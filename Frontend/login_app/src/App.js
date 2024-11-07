@@ -7,8 +7,8 @@ const App = () => {
   const [loginAttempts, setLoginAttempts] = useState([]);
 
   return (
-    <div className="App">
-      <LoginForm onSubmit={({ login, password }) => console.log({ login, password })} />
+      <div className="App">
+          <LoginForm onSubmit={({ login, password }) => setLoginAttempts([...loginAttempts, {login, password}])} />
       <LoginAttemptList attempts={loginAttempts} />
     </div>
   );

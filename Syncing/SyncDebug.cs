@@ -12,11 +12,13 @@ namespace DeveloperSample.Syncing
         public List<string> InitializeList(IEnumerable<string> items)
         {
             var bag = new ConcurrentBag<string>();
-            Parallel.ForEach(items, async i =>
+            var task = Parallel.ForEachAsync(items, async (i, token) =>
             {
                 var r = await Task.Run(() => i).ConfigureAwait(false);
                 bag.Add(r);
             });
+
+            Task.Run(() => task).Wait();
             var list = bag.ToList();
             return list;
         }
@@ -30,7 +32,8 @@ namespace DeveloperSample.Syncing
                 .Select(i => new Thread(() => {
                     foreach (var item in itemsToInitialize)
                     {
-                        concurrentDictionary.AddOrUpdate(item, getItem, (_, s) => s);
+                        lock (concurrentDictionary)
+                            concurrentDictionary.AddOrUpdate(item, getItem, (_, s) => s);
                     }
                 }))
                 .ToList();
